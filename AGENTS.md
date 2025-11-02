@@ -1,33 +1,34 @@
-# Agent Guidelines for InfooScreen.github.io
+# Agent Guidelines for InfooScreen
 
-This document outlines the conventions and commands for agentic coding in this repository.
+Multi-service screen sharing application with TypeScript/WebSocket rendezvous server and Go web server deployed on Vercel.
 
-## 1. Build, Lint, and Test Commands
+## Build, Lint, and Test Commands
 
-*   **TypeScript (screensy-rendezvous, screensy-website):**
-    *   Build: `npx tsc -p <project-directory>/tsconfig.json` (e.g., `npx tsc -p screensy-rendezvous/tsconfig.json`)
-    *   Run all tests: No explicit test runner configured.
-*   **Go (screensy-website):**
-    *   Build: `go build ./...` (run from `screensy-website/`)
-    *   Run all tests: `go test ./...` (run from `screensy-website/`)
-    *   Run a single test: `go test -run <TestName> ./...` (run from `screensy-website/`)
-    *   Lint/Format: `go vet ./...` and `go fmt ./...` (run from `screensy-website/`)
+**TypeScript (screensy-rendezvous):**
+- Build: `cd screensy-rendezvous && npx tsc -p tsconfig.json`
+- Install deps: `cd screensy-rendezvous && npm install`
+- No tests configured
 
-## 2. Code Style Guidelines
+**Go (screensy-website):**
+- Build: `cd screensy-website && go build .`
+- Run: `cd screensy-website && go run main.go`
+- Test: `cd screensy-website && go test ./...`
+- Single test: `cd screensy-website && go test -run TestName`
+- Lint/Format: `cd screensy-website && go vet ./... && go fmt ./...`
 
-*   **Imports:** Use explicit imports. For TypeScript, `import * as ...` is common.
-*   **Formatting:**
-    *   **TypeScript:** 4-space indentation. Use `camelCase` for variables and functions. Interfaces are preferred for type definitions.
-    *   **Go:** Use `go fmt` for standard formatting (tabs for indentation). `camelCase` for unexported identifiers, `PascalCase` for exported.
-*   **Types:** Leverage TypeScript's strict type checking (`strict: true` in `tsconfig.json`). Go is statically typed.
-*   **Naming Conventions:**
-    *   **TypeScript:** `camelCase` for variables, functions, and methods. `PascalCase` for interfaces and classes.
-    *   **Go:** `camelCase` for unexported variables/functions, `PascalCase` for exported.
-*   **Error Handling:**
-    *   **TypeScript:** Use `try...catch` for runtime errors (e.g., JSON parsing). Validate inputs explicitly.
-    *   **Go:** Handle errors explicitly using `if err != nil { ... }`. Use `log.Fatal` for critical errors and `panic` for unrecoverable initialization issues.
-*   **Comments:** Use JSDoc for TypeScript and standard Go comments. Explain *why* rather than *what*.
+**Docker (Full stack):**
+- Build all: `docker-compose build`
+- Run all: `docker-compose up -d`
+- Run single service: `docker-compose up <service-name>`
 
-## 3. Cursor/Copilot Rules
+## Code Style Guidelines
 
-No specific Cursor or Copilot rules files were found in this repository.
+**TypeScript:** Strict mode enabled. 4-space indent. `camelCase` variables/functions, `PascalCase` interfaces. Explicit imports. JSDoc comments explaining *why*.
+
+**Go:** `go fmt` standard formatting. `camelCase` unexported, `PascalCase` exported. Explicit error handling with `if err != nil`. Standard comments.
+
+**General:** No tests exist yet. Focus on WebRTC signaling and i18n. Docker-first deployment with Caddy reverse proxy.
+
+## Cursor/Copilot Rules
+
+No specific Cursor or Copilot rules files found.

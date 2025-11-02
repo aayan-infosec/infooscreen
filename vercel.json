@@ -1,14 +1,8 @@
 {
   "builds": [
     {
-      "src": "screensy-website/main.go",
-      "use": "@vercel/go"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "screensy-website/main.go"
+      "src": "screensy-website/Dockerfile",
+      "use": "@vercel/docker"
     }
   ]
 }

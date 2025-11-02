@@ -6,40 +6,44 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 	"time"
 
 	"golang.org/x/text/language"
 )
 
-var (
-	initOnce  sync.Once
+var state = globalState{}
+
+type globalState struct {
 	fileCache [][]byte
 	matcher   language.Matcher
-	fs        http.Handler
-)
-
-func Handler(w http.ResponseWriter, r *http.Request) {
-	initOnce.Do(func() {
-		var err error
-		fileCache, matcher = fetchTranslations()
-		fs = http.FileServer(http.Dir("."))
-	})
-
-	if r.URL.Path == "/" || r.URL.Path == "/index.html" {
-		acceptLanguageHeader := r.Header.Get("Accept-Language")
-		tags, _, _ := language.ParseAcceptLanguage(acceptLanguageHeader)
-		_, idx, _ := matcher.Match(tags...)
-		fileContent := fileCache[idx]
-
-		http.ServeContent(w, r, "index.html", time.Time{}, bytes.NewReader(fileContent))
-	} else {
-		fs.ServeHTTP(w, r)
-	}
 }
 
+func main() {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080" // fallback for local development
+	}
+
+	// This webserver only deals with very small requests; 5 seconds should be plenty
+	const timeout = 5 * time.Second
+
+	state.fileCache, state.matcher = fetchTranslations()
+
+	server := http.Server{
+		Addr:         fmt.Sprintf(":%s", port),
+		Handler:      http.HandlerFunc(getServer(http.FileServer(http.Dir(".")))),
+		ReadTimeout:  timeout,
+		WriteTimeout: timeout,
+		IdleTimeout:  timeout,
+	}
+
+	log.Printf("Server started on port %s", port)
+	err := server.ListenAndServe()
+	log.Fatal(err)
+}
 
 func fetchTranslations() ([][]byte, language.Matcher) {
 	// Get the filepaths of all translations
@@ -85,4 +89,17 @@ func fetchTranslations() ([][]byte, language.Matcher) {
 	return fileCache, language.NewMatcher(languageTags)
 }
 
+func getServer(fileServer http.Handler) func(writer http.ResponseWriter, request *http.Request) {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		if request.URL.Path == "/" || request.URL.Path == "/index.html" {
+			acceptLanguageHeader := request.Header.Get("Accept-Language")
+			tags, _, _ := language.ParseAcceptLanguage(acceptLanguageHeader)
+			_, idx, _ := state.matcher.Match(tags...)
+			fileContent := state.fileCache[idx]
 
+			http.ServeContent(writer, request, "index.html", time.Time{}, bytes.NewReader(fileContent))
+		} else {
+			fileServer.ServeHTTP(writer, request)
+		}
+	}
+}
