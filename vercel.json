@@ -1,8 +1,1 @@
-{
-  "builds": [
-    {
-      "src": "screensy-website/Dockerfile",
-      "use": "@vercel/docker"
-    }
-  ]
-}
+{}
