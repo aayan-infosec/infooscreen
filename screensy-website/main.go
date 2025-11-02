@@ -33,7 +33,7 @@ func main() {
 	state.fileCache, state.matcher = fetchTranslations()
 
 	server := http.Server{
-		Addr:         fmt.Sprintf(":%s", port),
+		Addr:         fmt.Sprintf("0.0.0.0:%s", port),
 		Handler:      http.HandlerFunc(getServer(http.FileServer(http.Dir(".")))),
 		ReadTimeout:  timeout,
 		WriteTimeout: timeout,
@@ -91,6 +91,11 @@ func fetchTranslations() ([][]byte, language.Matcher) {
 
 func getServer(fileServer http.Handler) func(writer http.ResponseWriter, request *http.Request) {
 	return func(writer http.ResponseWriter, request *http.Request) {
+		if request.URL.Path == "/health" {
+			writer.WriteHeader(http.StatusOK)
+			writer.Write([]byte("OK"))
+			return
+		}
 		if request.URL.Path == "/" || request.URL.Path == "/index.html" {
 			acceptLanguageHeader := request.Header.Get("Accept-Language")
 			tags, _, _ := language.ParseAcceptLanguage(acceptLanguageHeader)
