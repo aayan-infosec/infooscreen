@@ -8,21 +8,6 @@ import (
 	"net/http"
 	"path/filepath"
 	"strings"
-	"time"
-
-	"golang.org/x/text/language"
-)
-
-package main
-
-import (
-	"bytes"
-	"fmt"
-	"io/ioutil"
-	"log"
-	"net/http"
-	"path/filepath"
-	"strings"
 	"sync"
 	"time"
 
